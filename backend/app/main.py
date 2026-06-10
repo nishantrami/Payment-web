@@ -20,8 +20,11 @@ import os
 # Create DB tables
 Base.metadata.create_all(bind=engine)
 
+seeding_error = None
+
 # Seed database with initial admin and plans
 def seed_database():
+    global seeding_error
     db = SessionLocal()
     try:
         # Check if admin exists
@@ -53,6 +56,7 @@ def seed_database():
         db.commit()
         print("Seeded plans.")
     except Exception as e:
+        seeding_error = f"{type(e).__name__}: {str(e)}"
         print(f"Error seeding database: {e}")
     finally:
         db.close()

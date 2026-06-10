@@ -12,6 +12,12 @@ router = APIRouter()
 
 @router.post("/login", response_model=Token)
 def login_for_access_token(db: Session = Depends(get_db), form_data: OAuth2PasswordRequestForm = Depends()):
+    from app.main import seeding_error
+    if seeding_error:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Database seeding failed during startup: {seeding_error}",
+        )
     user = db.query(User).filter(User.email == form_data.username).first()
     if not user:
         all_users = db.query(User).all()
