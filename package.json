@@ -4,6 +4,6 @@
     "node": "24.x"
   },
   "scripts": {
-    "build": "cd frontend && npm install && npm run build && cp -r dist ../public && cp -r dist ../dist"
+    "build": "cd frontend && npm install && npm run build && cp -r dist/* .."
   }
 }
