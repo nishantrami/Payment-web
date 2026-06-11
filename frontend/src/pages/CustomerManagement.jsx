@@ -5,6 +5,7 @@ export default function CustomerManagement() {
   const [customers, setCustomers] = useState([]);
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState(null);
 
@@ -19,6 +20,7 @@ export default function CustomerManagement() {
 
   const fetchData = async () => {
     setLoading(true);
+    setError(null);
     try {
       const [custRes, plansRes] = await Promise.all([
         api.get('/customers'),
@@ -28,6 +30,7 @@ export default function CustomerManagement() {
       setPlans(plansRes.data);
     } catch (err) {
       console.error(err);
+      setError(err.response?.data?.detail || 'Failed to load customers data');
     } finally {
       setLoading(false);
     }
@@ -109,9 +112,16 @@ export default function CustomerManagement() {
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan="5" className="p-4 text-center">Loading...</td></tr>
+              <tr><td colSpan="6" className="p-4 text-center">Loading...</td></tr>
+            ) : error ? (
+              <tr>
+                <td colSpan="6" className="p-4 text-center text-red-600 font-semibold">
+                  {error}
+                  <button onClick={fetchData} className="ml-3 bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1 rounded text-xs font-bold transition">Retry</button>
+                </td>
+              </tr>
             ) : customers.length === 0 ? (
-              <tr><td colSpan="5" className="p-4 text-center text-gray-500">No customers found.</td></tr>
+              <tr><td colSpan="6" className="p-4 text-center text-gray-500">No customers found.</td></tr>
             ) : (
               customers.map(c => (
                 <tr key={c.id} className="border-b hover:bg-gray-50 transition">

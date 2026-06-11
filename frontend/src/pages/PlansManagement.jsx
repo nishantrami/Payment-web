@@ -4,6 +4,7 @@ import api from '../services/api';
 export default function PlansManagement() {
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -12,11 +13,13 @@ export default function PlansManagement() {
 
   const fetchPlans = async () => {
     setLoading(true);
+    setError(null);
     try {
       const res = await api.get('/plans');
       setPlans(res.data);
     } catch (err) {
       console.error(err);
+      setError(err.response?.data?.detail || 'Failed to load subscription plans');
     } finally {
       setLoading(false);
     }
@@ -77,6 +80,11 @@ export default function PlansManagement() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {loading ? (
           <p>Loading plans...</p>
+        ) : error ? (
+          <div className="col-span-full text-center py-6">
+            <p className="text-red-600 font-semibold mb-2">{error}</p>
+            <button onClick={fetchPlans} className="bg-red-100 hover:bg-red-200 text-red-700 px-4 py-2 rounded font-bold transition">Retry</button>
+          </div>
         ) : plans.length === 0 ? (
           <p className="text-gray-500">No plans created yet. Click "+ Add Plan" to create the Silver, Gold, Platinum, Diamond, Titanium, and Crown plans.</p>
         ) : (

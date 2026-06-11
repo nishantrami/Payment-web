@@ -19,22 +19,39 @@ const itemVariants = {
 
 export default function AdminDashboard() {
   const [metrics, setMetrics] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const fetchMetrics = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await api.get('/analytics/dashboard');
+      setMetrics(res.data);
+    } catch (err) {
+      console.error(err);
+      setError(err.response?.data?.detail || 'Failed to load dashboard metrics');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchMetrics = async () => {
-      try {
-        const res = await api.get('/analytics/dashboard');
-        setMetrics(res.data);
-      } catch (err) {
-        console.error(err);
-      }
-    };
     fetchMetrics();
   }, []);
 
-  if (!metrics) return (
+  if (loading) return (
     <div className="flex justify-center items-center h-64">
       <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+    </div>
+  );
+
+  if (error) return (
+    <div className="p-6 bg-red-50 border border-red-200 rounded-2xl text-center max-w-md mx-auto my-12 shadow-sm">
+      <p className="text-red-800 font-semibold mb-4">{error}</p>
+      <button onClick={fetchMetrics} className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-2.5 px-6 rounded-xl transition shadow-md shadow-blue-500/20">
+        Retry
+      </button>
     </div>
   );
 

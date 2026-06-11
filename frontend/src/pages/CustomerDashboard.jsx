@@ -23,6 +23,7 @@ export default function CustomerDashboard() {
   const [payments, setPayments] = useState([]);
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [qrModalData, setQrModalData] = useState(null);
   const [changePlanModal, setChangePlanModal] = useState(false);
   const [selectedPlanId, setSelectedPlanId] = useState('');
@@ -35,6 +36,8 @@ export default function CustomerDashboard() {
   ];
 
   const fetchData = async () => {
+    setLoading(true);
+    setError(null);
     try {
       const profileRes = await api.get('/customers/profile/me');
       setProfile(profileRes.data);
@@ -46,6 +49,7 @@ export default function CustomerDashboard() {
       setPlans(plansRes.data);
     } catch (err) {
       console.error(err);
+      setError(err.response?.data?.detail || 'Failed to load profile or subscription details.');
     } finally {
       setLoading(false);
     }
@@ -132,6 +136,22 @@ export default function CustomerDashboard() {
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center">
       <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-600"></div>
+    </div>
+  );
+
+  if (error) return (
+    <div className="min-h-screen flex flex-col items-center justify-center p-4">
+      <div className="glass p-8 rounded-3xl text-center max-w-md border border-white/20 shadow-xl">
+        <p className="text-red-600 font-bold mb-6">{error}</p>
+        <div className="flex gap-4 justify-center">
+          <button onClick={fetchData} className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-2.5 px-6 rounded-xl shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 transition-all border border-blue-500/50">
+            Retry
+          </button>
+          <button onClick={logout} className="bg-white border border-slate-200 text-slate-700 font-bold py-2.5 px-6 rounded-xl hover:bg-slate-50 transition-all shadow-sm">
+            Logout
+          </button>
+        </div>
+      </div>
     </div>
   );
 

@@ -18,6 +18,7 @@ const itemVariants = {
 export default function AdminUserManagement() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [blockingUserId, setBlockingUserId] = useState(null);
 
   useEffect(() => {
@@ -25,13 +26,14 @@ export default function AdminUserManagement() {
   }, []);
 
   const fetchUsers = async () => {
+    setLoading(true);
+    setError(null);
     try {
-      setLoading(true);
       const res = await api.get('/users');
       setUsers(res.data);
     } catch (err) {
       console.error(err);
-      alert('Failed to fetch users');
+      setError(err.response?.data?.detail || 'Failed to fetch users');
     } finally {
       setLoading(false);
     }
@@ -62,6 +64,15 @@ export default function AdminUserManagement() {
   if (loading) return (
     <div className="flex justify-center items-center h-64">
       <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
+    </div>
+  );
+
+  if (error) return (
+    <div className="p-6 bg-red-50 border border-red-200 rounded-2xl text-center max-w-md mx-auto my-12 shadow-sm">
+      <p className="text-red-800 font-semibold mb-4">{error}</p>
+      <button onClick={fetchUsers} className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-2.5 px-6 rounded-xl transition shadow-md shadow-blue-500/20">
+        Retry
+      </button>
     </div>
   );
 

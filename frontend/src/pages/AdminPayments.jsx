@@ -6,9 +6,11 @@ export default function AdminPayments() {
   const [payments, setPayments] = useState([]);
   const [customers, setCustomers] = useState({});
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const fetchData = async () => {
     setLoading(true);
+    setError(null);
     try {
       const [payRes, custRes] = await Promise.all([
         api.get('/payments'),
@@ -24,6 +26,7 @@ export default function AdminPayments() {
       setPayments(payRes.data);
     } catch (err) {
       console.error(err);
+      setError(err.response?.data?.detail || 'Failed to load payments data');
     } finally {
       setLoading(false);
     }
@@ -106,6 +109,13 @@ export default function AdminPayments() {
           <tbody>
             {loading ? (
               <tr><td colSpan="7" className="p-4 text-center">Loading payments...</td></tr>
+            ) : error ? (
+              <tr>
+                <td colSpan="7" className="p-4 text-center text-red-600 font-semibold">
+                  {error}
+                  <button onClick={fetchData} className="ml-3 bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1 rounded text-xs font-bold transition">Retry</button>
+                </td>
+              </tr>
             ) : payments.length === 0 ? (
               <tr><td colSpan="7" className="p-4 text-center text-gray-500">No payments found.</td></tr>
             ) : (
