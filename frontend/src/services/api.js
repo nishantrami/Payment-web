@@ -4,11 +4,25 @@ const getBaseURL = () => {
   if (import.meta.env.VITE_API_URL) {
     return import.meta.env.VITE_API_URL;
   }
-  // Automatically fallback to relative path on hosted production domains (like Vercel)
-  if (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
-    return '/api';
+  
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname;
+    // Check if we are on a local host
+    const isLocalhost = 
+      hostname === 'localhost' || 
+      hostname === '127.0.0.1' || 
+      hostname === '[::1]' ||
+      hostname.startsWith('192.168.') || 
+      hostname.startsWith('10.') || 
+      hostname.startsWith('172.');
+      
+    if (isLocalhost) {
+      return `http://${hostname}:8000/api`;
+    }
   }
-  return 'http://localhost:8000/api';
+  
+  // Fallback to relative path on hosted production domains (like Vercel)
+  return '/api';
 };
 
 const api = axios.create({
